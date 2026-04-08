@@ -16,11 +16,15 @@ export default function DetailModal({
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [multiImages, setMultiImages] = useState<{name: string; url: string}[]>([]);
+  const [multiLoading, setMultiLoading] = useState(false);
 
   useEffect(() => {
     setImageUrl(null);
     setGenerating(false);
     setCustomPrompt("");
+    setMultiImages([]);
+    setMultiLoading(false);
   }, [invention?.id]);
 
   if (!invention) return null;
@@ -46,6 +50,29 @@ export default function DetailModal({
       console.error("Image gen failed:", err);
     }
     setGenerating(false);
+  };
+
+  const handleMultiImages = async () => {
+    if (!invention.imagePrompt || multiLoading) return;
+    setMultiLoading(true);
+    try {
+      const res = await fetch("/api/generate-multi-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inventionId: invention.id, basePrompt: invention.imagePrompt }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMultiImages(data.images || []);
+        if (data.images?.[0]?.url) {
+          setImageUrl(data.images[0].url);
+          if (onUpdate) onUpdate({ ...invention, imageUrl: data.images[0].url });
+        }
+      }
+    } catch (err) {
+      console.error("Multi-image gen failed:", err);
+    }
+    setMultiLoading(false);
   };
 
   const infoRows = [
@@ -92,6 +119,7 @@ export default function DetailModal({
               style={{ flex: 1, padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#fff", fontSize: "12px", outline: "none", fontFamily: "inherit" }}
             />
             <button onClick={() => handleGenerateImage()} style={{ padding: "8px 14px", borderRadius: "10px", border: "1px solid rgba(0,255,136,0.2)", background: "rgba(0,255,136,0.08)", color: "#00ff88", fontSize: "12px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>🔄 重新生成</button>
+            <button onClick={handleMultiImages} disabled={multiLoading} style={{ padding: "8px 14px", borderRadius: "10px", border: "1px solid rgba(107,179,255,0.2)", background: multiLoading ? "rgba(107,179,255,0.1)" : "rgba(107,179,255,0.15)", color: "#6bb3ff", fontSize: "12px", fontWeight: "600", cursor: multiLoading ? "wait" : "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>{multiLoading ? "生成中...约30秒" : "📸 4张多角度图"}</button>
             {customPrompt.trim() && (
               <button onClick={() => handleGenerateImage(customPrompt)} style={{ padding: "8px 14px", borderRadius: "10px", border: "1px solid rgba(100,180,255,0.2)", background: "rgba(100,180,255,0.08)", color: "#6bb3ff", fontSize: "12px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>按要求重新生成</button>
             )}
@@ -103,6 +131,17 @@ export default function DetailModal({
             <div style={{ width: "16px", height: "16px", border: "2px solid rgba(0,255,136,0.2)", borderTopColor: "#00ff88", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
             <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>重新生成中...</span>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
+
+        {multiImages.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+            {multiImages.map((img, i) => (
+              <div key={i} style={{ position: "relative", borderRadius: "12px", overflow: "hidden", cursor: "pointer" }} onClick={() => setImageUrl(img.url)}>
+                <img src={img.url} alt={img.name} style={{ width: "100%", borderRadius: "12px" }} />
+                <div style={{ position: "absolute", bottom: "8px", left: "8px", padding: "3px 10px", borderRadius: "100px", background: "rgba(0,0,0,0.6)", fontSize: "11px", color: "#fff" }}>{img.name}</div>
+              </div>
+            ))}
           </div>
         )}
 
