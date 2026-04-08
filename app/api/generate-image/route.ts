@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -6,36 +5,32 @@ export async function POST(req: NextRequest) {
   try {
     const { inventionId, prompt } = await req.json();
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `Generate a product concept image: ${prompt}. Style: clean product photography on white/minimal background, high-end commercial look, studio lighting.`,
-                },
-              ],
-            },
-          ],
-          generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-        }),
-      }
-    );
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: `Product concept photo: ${prompt}. Style: clean product photography, white background, Amazon listing style, studio lighting, high-end commercial look.`,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      }),
+    });
 
     const data = await response.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((p: any) => p.inlineData);
 
-    if (!imagePart) {
-      return NextResponse.json({ error: "No image generated" }, { status: 500 });
+    if (data.error) {
+      console.error("OpenAI error:", data.error);
+      return NextResponse.json({ error: data.error.message }, { status: 500 });
     }
 
-    const base64 = imagePart.inlineData.data;
-    const imageUrl = `data:image/png;base64,${base64}`;
+    const imageUrl = data.data?.[0]?.url;
+    if (!imageUrl) {
+      return NextResponse.json({ error: "No image generated" }, { status: 500 });
+    }
 
     if (inventionId) {
       await prisma.invention.update({
@@ -47,7 +42,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ imageUrl });
   } catch (error) {
     console.error("Image generation failed:", error);
-    console.error("Image generation error details:", JSON.stringify(error));
     return NextResponse.json({ error: "图片生成失败" }, { status: 500 });
   }
 }
