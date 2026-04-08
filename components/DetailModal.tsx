@@ -15,24 +15,27 @@ export default function DetailModal({
 }) {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState("");
 
   useEffect(() => {
     setImageUrl(null);
     setGenerating(false);
+    setCustomPrompt("");
   }, [invention?.id]);
 
   if (!invention) return null;
 
   const displayImage = imageUrl || invention.imageUrl;
 
-  const handleGenerateImage = async () => {
+  const handleGenerateImage = async (extraPrompt?: string) => {
     if (!invention.imagePrompt || generating) return;
     setGenerating(true);
     try {
+      const prompt = invention.imagePrompt + (extraPrompt ? ". Additional requirements: " + extraPrompt : "");
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inventionId: invention.id, prompt: invention.imagePrompt }),
+        body: JSON.stringify({ inventionId: invention.id, prompt }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -62,7 +65,7 @@ export default function DetailModal({
         <h2 style={{ fontSize: "26px", fontWeight: "800", margin: "0 0 6px 0" }}>{invention.title}</h2>
         <p style={{ fontSize: "15px", color: "rgba(0,255,136,0.65)", margin: "0 0 24px 0", fontStyle: "italic" }}>{invention.tagline}</p>
 
-        <div onClick={!displayImage ? handleGenerateImage : undefined} style={{ background: displayImage ? "transparent" : "linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,100,255,0.04))", border: displayImage ? "none" : "1px dashed rgba(0,255,136,0.15)", borderRadius: "16px", minHeight: "200px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: "24px", cursor: displayImage ? "default" : "pointer", overflow: "hidden" }}>
+        <div onClick={!displayImage && !generating ? () => handleGenerateImage() : undefined} style={{ background: displayImage ? "transparent" : "linear-gradient(135deg, rgba(0,255,136,0.04), rgba(0,100,255,0.04))", border: displayImage ? "none" : "1px dashed rgba(0,255,136,0.15)", borderRadius: "16px", minHeight: "200px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: displayImage ? "12px" : "24px", cursor: displayImage ? "default" : "pointer", overflow: "hidden" }}>
           {displayImage ? (
             <img src={displayImage} alt={invention.title} style={{ width: "100%", borderRadius: "16px", objectFit: "cover" }} />
           ) : generating ? (
@@ -75,10 +78,33 @@ export default function DetailModal({
             <>
               <span style={{ fontSize: "36px", marginBottom: "10px" }}>🎨</span>
               <span style={{ fontSize: "14px", color: "#00ff88", fontWeight: "600" }}>点击生成 AI 概念图</span>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", marginTop: "6px" }}>Powered by Google Gemini</span>
+              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.2)", marginTop: "6px" }}>Powered by DALL·E 3</span>
             </>
           )}
         </div>
+
+        {displayImage && !generating && (
+          <div style={{ display: "flex", gap: "8px", marginBottom: "24px", alignItems: "center" }}>
+            <input
+              value={customPrompt}
+              onChange={(e) => setCustomPrompt(e.target.value)}
+              placeholder="补充要求，如：白色背景、去掉灯光效果..."
+              style={{ flex: 1, padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#fff", fontSize: "12px", outline: "none", fontFamily: "inherit" }}
+            />
+            <button onClick={() => handleGenerateImage()} style={{ padding: "8px 14px", borderRadius: "10px", border: "1px solid rgba(0,255,136,0.2)", background: "rgba(0,255,136,0.08)", color: "#00ff88", fontSize: "12px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>🔄 重新生成</button>
+            {customPrompt.trim() && (
+              <button onClick={() => handleGenerateImage(customPrompt)} style={{ padding: "8px 14px", borderRadius: "10px", border: "1px solid rgba(100,180,255,0.2)", background: "rgba(100,180,255,0.08)", color: "#6bb3ff", fontSize: "12px", fontWeight: "600", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>按要求重新生成</button>
+            )}
+          </div>
+        )}
+
+        {generating && displayImage && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "24px", justifyContent: "center" }}>
+            <div style={{ width: "16px", height: "16px", border: "2px solid rgba(0,255,136,0.2)", borderTopColor: "#00ff88", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>重新生成中...</span>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
 
         {infoRows.map((row, i) => (
           <div key={i} style={{ padding: "14px 18px", borderRadius: "14px", marginBottom: "10px", background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.03)" }}>
