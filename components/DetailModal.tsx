@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Invention } from "@/lib/types";
 import ScoreRing from "./ScoreRing";
 
@@ -15,6 +15,11 @@ export default function DetailModal({
 }) {
   const [generating, setGenerating] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setImageUrl(null);
+    setGenerating(false);
+  }, [invention?.id]);
 
   if (!invention) return null;
 
