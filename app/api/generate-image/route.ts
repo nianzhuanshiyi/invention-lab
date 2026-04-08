@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         model: "dall-e-3",
-        prompt: `Product concept photo: ${prompt}. Style: clean product photography, white background, Amazon listing style, studio lighting, high-end commercial look.`,
+        prompt: `Real product photo of: ${prompt}. IMPORTANT STYLE RULES: This must look like a REAL existing product photographed for Amazon listing. Simple, practical, everyday product. Shot on white seamless background. Natural studio lighting, no dramatic effects. No futuristic or sci-fi elements. No glowing lights or neon. The product should look like something you can buy today in a store. Clean, simple, realistic. iPhone photo quality. No 3D renders.`,
         n: 1,
         size: "1024x1024",
         quality: "standard",
