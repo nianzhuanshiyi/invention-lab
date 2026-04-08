@@ -6,6 +6,7 @@ import ParticleField from "@/components/ParticleField";
 import InventionCard from "@/components/InventionCard";
 import GeneratePanel from "@/components/GeneratePanel";
 import DetailModal from "@/components/DetailModal";
+import AnalyzePanel from "@/components/AnalyzePanel";
 
 const CATEGORIES = [
   "全部", "科技周边", "应急科技", "健康科技", "生活方式",
@@ -25,6 +26,7 @@ export default function Home() {
   const [sort, setSort] = useState("newest");
   const [selected, setSelected] = useState<Invention | null>(null);
   const [loading, setLoading] = useState(false);
+  const [analyzeLoading, setAnalyzeLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   const fetchInventions = useCallback(async () => {
@@ -144,6 +146,17 @@ export default function Home() {
             捕捉全球趋势 → 发现用户痛点 → AI生成产品概念 → 可视化呈现
           </p>
         </div>
+
+        {/* Analyze */}
+        <AnalyzePanel
+          loading={analyzeLoading}
+          setLoading={setAnalyzeLoading}
+          onResult={(data) => {
+            if (data.invention) {
+              setInventions((prev) => [data.invention, ...prev]);
+            }
+          }}
+        />
 
         {/* Generator */}
         <GeneratePanel onGenerate={handleGenerate} loading={loading} trends={trends} />
