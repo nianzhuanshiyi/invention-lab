@@ -218,7 +218,7 @@ export default function Home() {
         </div>
       </div>
 
-      <DetailModal invention={selected} onClose={() => setSelected(null)} />
+      <DetailModal invention={selected} onClose={() => setSelected(null)} onUpdate={(inv) => { setSelected(inv); setInventions(prev => prev.map(i => i.id === inv.id ? inv : i)); }} />
     </div>
   );
 }
