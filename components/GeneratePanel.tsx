@@ -6,6 +6,8 @@ interface TrendItem {
   description: string;
   region: string;
   potential: string;
+  searchTrend?: string;
+  dataSource?: string;
 }
 
 export default function GeneratePanel({
@@ -90,7 +92,7 @@ export default function GeneratePanel({
               }}
               title={t.potential}
             >
-              {t.keyword}
+              {t.keyword} {t.searchTrend === "爆发" ? "🔥" : t.searchTrend === "上升" ? "📈" : ""}
             </button>
           ))}
         </div>
