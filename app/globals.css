@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg-primary: #0a0e14;
+  --bg-secondary: #111620;
+  --bg-card: #151b28;
+  --accent: #00ff88;
+  --accent-dim: rgba(0, 255, 136, 0.15);
+  --accent-glow: rgba(0, 255, 136, 0.08);
+  --text-primary: #f0f4f8;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --text-muted: rgba(255, 255, 255, 0.25);
+  --border: rgba(255, 255, 255, 0.06);
+  --danger: #ff6b6b;
+  --warning: #ffd700;
+  --info: #6bb3ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(0, 255, 136, 0.3);
+  color: #fff;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,255,136,0.35); }
+
+/* Animations */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+  50% { opacity: 1; box-shadow: 0 0 20px rgba(0,255,136,0.4); }
+}
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(15px, -25px); }
+  50% { transform: translate(-10px, -50px); }
+  75% { transform: translate(20px, -25px); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease both;
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #00ff88, #00ddff, #00ff88);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s linear infinite;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.04), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+/* Card hover effects */
+.invention-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.invention-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 255, 136, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 255, 136, 0.06);
+}
+
+/* Input focus */
+input:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(0, 255, 136, 0.4) !important;
+  box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.08);
+}
+
+/* Category pill active */
+.cat-pill {
+  transition: all 0.25s ease;
+}
+.cat-pill:hover {
+  background: rgba(0, 255, 136, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+.cat-pill.active {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00ff88;
+  border-color: rgba(0, 255, 136, 0.3);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  animation: fade-in 0.2s ease;
+}
+.modal-content {
+  animation: scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}

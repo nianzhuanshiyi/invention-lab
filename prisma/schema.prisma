@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Invention {
+  id          String   @id @default(cuid())
+  title       String
+  tagline     String
+  trend       String
+  trendSource String
+  painPoint   String   @db.Text
+  solution    String   @db.Text
+  category    String
+  status      String   @default("概念阶段")
+  score       Int      @default(75)
+  imagePrompt String?  @db.Text
+  imageUrl    String?
+  marketSize  String?
+  targetPrice String?
+  highlights  String[] @default([])
+  votes       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([createdAt])
+  @@index([votes])
+}
